@@ -10,11 +10,13 @@ Además, se separaron los **canales R, G y B**, lo que permitió analizar cómo 
 
 
 Imágen original:
+
 ![Imagen original](python/data/gato.jpg)
 
 Finalmente, se generó un **GIF animado** que recorre la imagen original, los resultados de los filtros y las operaciones morfológicas de manera secuencial, con 1 segundo por frame y repetición en bucle. Este GIF permite visualizar fácilmente los efectos de cada procesamiento y comprender cómo los diferentes filtros y transformaciones alteran la imagen.
 
 GIF con los resultados:
+
 ![Gif resultados](python/gifs/procesamiento_animacion.gif)
 
 --- 
