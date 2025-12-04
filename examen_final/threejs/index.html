@@ -64,7 +64,7 @@
         // 4. Aplicación de Texturas e Iluminación
         const textureLoader = new THREE.TextureLoader();
         
-        // Textura 1: Para el plano del suelo
+        // Textura 1: Para el plano del suelo, simulación de nieve
         const groundTexture = textureLoader.load('./texturas/nieve.jpg');
         groundTexture.wrapS = THREE.RepeatWrapping;
         groundTexture.wrapT = THREE.RepeatWrapping;
@@ -72,7 +72,7 @@
 
         const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
         
-        // Textura 2: Para el cubo giratorio
+        // Textura 2: Para el cubo giratorio, simulación de regalo de navidad
         const boxTexture = textureLoader.load('./texturas/navidad.jpg');
         const boxMaterial = new THREE.MeshStandardMaterial({ map: boxTexture });
 
