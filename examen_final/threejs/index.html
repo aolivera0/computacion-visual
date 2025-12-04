@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Escena con Formas Básicas</title>
+    <style>
+        body { margin: 0; overflow: hidden; } /* Elimina márgenes y barras de desplazamiento */
+        canvas { display: block; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        Presiona **P** para cambiar de perspectiva.<br>
+        Usa el **ratón** para OrbitControls.
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // 1. Configuración Inicial
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.setClearColor(0x333333); // Fondo gris oscuro
+
+        // Cámaras y Perspectivas
+        const camera1 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera1.position.set(0, 5, 10); // Vista principal
+        camera1.lookAt(0, 0, 0);
+
+        const camera2 = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera2.position.set(15, 8, 0); // Vista lateral/elevada
+        camera2.lookAt(0, 0, 0);
+
+        let currentCamera = camera1;
+        
+        // 5. Controles de Cámara (OrbitControls)
+        const controls = new THREE.OrbitControls(currentCamera, renderer.domElement);
+        controls.enableDamping = true; // Efecto de inercia
+        controls.dampingFactor = 0.05;
+
+        // Gestión de redimensionamiento de ventana
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera1.aspect = window.innerWidth / window.innerHeight;
+            camera1.updateProjectionMatrix();
+            camera2.aspect = window.innerWidth / window.innerHeight;
+            camera2.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // 4. Aplicación de Texturas e Iluminación
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Textura 1: Para el plano del suelo
+        const groundTexture = textureLoader.load('./texturas/nieve.jpg');
+        groundTexture.wrapS = THREE.RepeatWrapping;
+        groundTexture.wrapT = THREE.RepeatWrapping;
+        groundTexture.repeat.set(4, 4); // Repetir la textura
+
+        const groundMaterial = new THREE.MeshPhongMaterial({ map: groundTexture });
+        
+        // Textura 2: Para el cubo giratorio
+        const boxTexture = textureLoader.load('./texturas/navidad.jpg');
+        const boxMaterial = new THREE.MeshStandardMaterial({ map: boxTexture });
+
+        // Material básico sin textura
+        const coneMaterial = new THREE.MeshStandardMaterial({ color: 0x35F527 }); // Verde
+        const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0077, roughness: 0.3, metalness: 0.8 }); // Rosa metálico
+        
+        // Luces
+        // Luz 1: Luz direccional (como el sol)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        directionalLight.position.set(10, 15, 10);
+        scene.add(directionalLight);
+        
+        // Luz 2: Luz ambiental suave
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5); 
+        scene.add(ambientLight);
+
+        // 1. Añadir Múltiples Formas Básicas (Composición)
+        
+        // Suelo (Plano) - Textura 1
+        const groundGeometry = new THREE.PlaneGeometry(30, 30);
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2; // Gira para que sea horizontal
+        ground.position.y = -0.5;
+        scene.add(ground);
+
+        // Cubo (BoxGeometry) - Animado y con Textura 2
+        const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+        const cube = new THREE.Mesh(cubeGeometry, boxMaterial);
+        cube.position.set(0, 1.5, 0);
+        scene.add(cube);
+
+        // Cono (ConeGeometry) - Estático, material de color
+        const coneGeometry = new THREE.ConeGeometry(1, 3, 32);
+        const cone = new THREE.Mesh(coneGeometry, coneMaterial);
+        cone.position.set(4, 1, -3);
+        scene.add(cone);
+
+        // Esfera (SphereGeometry) - Animada, material metálico
+        const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(-5, 1.5, 3);
+        scene.add(sphere);
+
+        // 3. Animación de las Formas
+        const clock = new THREE.Clock();
+        
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const elapsedTime = clock.getElapsedTime();
+
+            // Animación del Cubo: Rotación continua en Y y X
+            cube.rotation.y = elapsedTime * 0.5;
+            cube.rotation.x = elapsedTime * 0.2;
+            
+            // Animación de la Esfera: Movimiento vertical oscilatorio (seno)
+            sphere.position.y = 1.5 + Math.sin(elapsedTime * 2) * 0.5;
+
+            // Actualizar OrbitControls
+            controls.update();
+
+            // Renderizar la escena
+            renderer.render(scene, currentCamera);
+        }
+        animate();
+
+        // 2. Cambio de Perspectiva con Tecla 'P'
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'p' || event.key === 'P') {
+                if (currentCamera === camera1) {
+                    currentCamera = camera2;
+                } else {
+                    currentCamera = camera1;
+                }
+                // Actualizar OrbitControls para que use la nueva cámara
+                controls.object = currentCamera;
+                controls.update();
+                console.log('Cámara cambiada a:', currentCamera.position.toArray());
+            }
+        });
+
+    </script>
+</body>
+</html>
